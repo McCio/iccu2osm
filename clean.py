@@ -210,15 +210,9 @@ def for_csv(df, col_names):
     cols.extend(col)
   print(cols)
   return df.with_columns(pl.col(col).list.join(';').replace('', None) for col in cols)  # map_elements(lambda cell: cell.str.join(';'), return_dtype=str))
-  # for col in cols:
-  #   print(df.select(col).filter(pl.col(col).is_not_null()))
-  #   df = df.with_columns(pl.col(col).list.join(';'))  # map_elements(lambda cell: cell.str.join(';'), return_dtype=str))
-  #   print(df.select(col).filter(pl.col(col).is_not_null()))
-  # return df
 
 for_csv(
   complete,
   [['denominazioni-precedenti', 'denominazioni-alternative'], *([f'valore_contact_{t}', f'note_contact_{t}'] for t in ('website', 'email', 'pec', 'fax', 'phone', 'facebook', 'instagram', 'twitter'))],
 ).write_csv('data/clean.csv')
-
 

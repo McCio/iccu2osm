@@ -5,12 +5,9 @@ query = [('amenity', 'library')]
 #bbox = [ 35.5, 6.7, 47.1, 18.5 ]  # True  # how to set italy?
 bounded_update = True
 regions = 'it'
-max_distance = 100  # meters
+max_distance = 200  # meters
 duplicate_distance = 1
-tag_unmatched = {
-  'fixme': 'absent from ICCU db',
-}
-master_tags = ('ref:isil', 'ref:sbn', 'ref:acnp', 'ref:cei', 'ref:cmbs', 'ref:rism', 'official_name', 'addr:housenumber', 'contact:phone', 'contact:website')
+master_tags = ('ref:isil', 'ref:sbn', 'ref:acnp', 'ref:cei', 'ref:cmbs', 'ref:rism', 'official_name', 'operator',  'addr:housenumber', 'contact:phone', 'contact:website')
 
 def dataset(f):
   import polars as pl
@@ -24,6 +21,8 @@ def dataset(f):
     'rism': 'ref:rism',
     'sbn': 'ref:sbn',
     'denominazione': 'official_name',
+    'denominazioni-precedenti': 'old_name',
+    'denominazioni-alternative': 'alt_name',
     'address_street': 'addr:street',
     'address_housenumber': 'addr:housenumber',
     'valore_contact_phone': 'contact:phone',
@@ -36,16 +35,20 @@ def dataset(f):
     'access': 'access',
     'wheelchair': 'wheelchair',
     'cap': 'addr:postcode',
+    'ente': 'operator',
   }
   csv = pl.read_csv(f).filter(~(pl.col('latitudine').is_null() | pl.col('longitudine').is_null())).rename(col_mapper)
   rows_to_use = [*col_mapper.values(), 'latitudine', 'longitudine']
   for row in csv.select(*rows_to_use).with_row_count(offset=1).to_dicts():
+    if old_name := row['old_name']:
+      row['old_name'] = old_name.split(';')[0]
+    if alt_name := row['alt_name']:
+      row['alt_name'] = alt_name.split(';')[0]
     el = {
       'pid': row['ref:isil'],
       'lat': row['latitudine'],
       'lon': row['longitudine'],
       'tags': row,
-      'region': 'it',
     }
     yield SourcePoint(**el)
 
