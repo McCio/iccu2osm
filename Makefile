@@ -3,7 +3,7 @@ env:
 	python3 -m venv venv
 	venv/bin/python3 -m pip install --upgrade pip
 	venv/bin/python3 -m pip install --requirement requirements.txt
-	patch venv/lib/python3.12/site-packages/conflate/geocoder.py geocoder.patch
+	patch venv/lib/python3.1?/site-packages/conflate/geocoder.py geocoder.patch
 
 update:
 	curl --etag-save data/iccu.etag --etag-compare data/iccu.etag --silent -o data/iccu.zip https://opendata.anagrafe.iccu.sbn.it/opendata.zip
