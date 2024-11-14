@@ -19,6 +19,7 @@ territorio = strip_strings(territorio)
 tipologie = pl.read_csv('data/tipologie.csv', separator=';').drop('denominazione biblioteca').rename({'codice isil': 'codice-isil'})
 tipologie = strip_strings(tipologie)
 
+
 def show_df(df):
   print(df.columns)
   #print(df)
@@ -30,13 +31,13 @@ def show_df(df):
 #show_df(territorio)
 #show_df(tipologie)
 
-#print(pl.sql("select f.* from fondi_speciali f where trim(f.\"fondo-speciale\") != ''").collect())
-
+print('Libraries before cleanup:', len(biblioteche))
 complete = biblioteche.join(contatti, on='codice-isil', how='left', validate='1:1', coalesce=True)
 complete = complete.join(fondi_speciali, on='codice-isil', how='left', validate='1:1', coalesce=True)
 complete = complete.join(patrimonio, on='codice-isil', how='left', validate='1:1', coalesce=True)
 complete = complete.join(territorio, on='codice-isil', how='left', validate='1:1', coalesce=True)
 #complete = complete.join(tipologie, on='codice-isil', how='left', validate='1:1', coalesce=True)
+
 reserved_access = pl.col('accesso').struct.field('riservato')
 wheelchair_access = pl.col('accesso').struct.field('portatori-handicap')
 complete = complete.with_columns(
@@ -202,6 +203,7 @@ complete = complete.with_columns(
 # serve comunque una passata manuale, fan schifo come sono scritti
 ###### FINE ADDRESS
 
+print('Libraries after cleanup:', len(complete))
 # complete.write_excel('data/clean.xlsx', 'biblioteche')
 
 def for_csv(df, col_names):
